@@ -1,0 +1,16 @@
+name = "d1-preflight-orders-example"
+main = "src/index.ts"
+# Latest date supported by the locked local workerd build.
+compatibility_date = "2026-10-30"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "preflight-orders"
+# Local example placeholder; replace only if deliberately deploying.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+migrations_table = "d1_migrations"

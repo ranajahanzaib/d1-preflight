@@ -72,3 +72,12 @@ yarn-error.log*
 
 # Python
 venv
+
+# Rust and local analysis outputs
+/target/
+/reports/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+examples/cloudflare-worker/node_modules/
+examples/cloudflare-worker/.wrangler/

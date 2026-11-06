@@ -44,3 +44,7 @@ We welcome contributions of all kinds to improve this project! Here's how you ca
 ### Issues
 
 Feel free to report bugs or suggest enhancements by creating an issue. Be sure to include detailed information about the problem and, if possible, steps to reproduce it.
+
+### D1 Preflight development
+
+Use stable Rust with a C compiler. Run `cargo fmt --all -- --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test --all-features` and `cargo build --release` before submitting. The CLI and tests require no Cloudflare account or Wrangler. Preserve stable rule IDs and report fields, and test both a positive detection and a false-positive case for analysis changes. Do not include private row data in fixtures or diagnostics. Changes to the optional Worker should also pass `pnpm install --frozen-lockfile` and `pnpm run typecheck` in its example directory.

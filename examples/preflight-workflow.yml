@@ -1,0 +1,28 @@
+# Copy into .github/workflows after adapting the explicit pending-file selection.
+name: D1 Migration Preflight
+on:
+  pull_request:
+    paths: ["migrations/**", "schema.sql", "queries/**"]
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      # Assumes D1 Preflight is checked out in this repository.
+      # In another project install it from a pinned, reviewed source revision.
+      - run: cargo build --locked --release
+      - name: Analyze selected pending migration
+        run: >-
+          ./target/release/d1-preflight check
+          --schema fixtures/performance/schema.sql
+          --migration fixtures/performance/migration.sql
+          --queries fixtures/performance/query.sql
+          --json-out reports/preflight.json
+          --markdown-out reports/preflight.md
+          --github --fail-on high
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preflight
+          path: reports/

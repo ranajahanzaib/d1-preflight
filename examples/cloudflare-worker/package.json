@@ -1,0 +1,14 @@
+{
+  "name": "d1-preflight-orders-example",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "types": "wrangler types --include-runtime false"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261101.1",
+    "typescript": "^5.9.0",
+    "wrangler": "^4.0.0"
+  }
+}

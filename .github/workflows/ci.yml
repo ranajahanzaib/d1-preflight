@@ -1,33 +1,20 @@
-name: CI
-
+name: Rust CI
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
-
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          node-version: 20
-
-      # Uncomment and adjust the steps below to match your project's setup
-
-      # - name: Install dependencies
-      #   run: npm ci
-
-      # - name: Lint
-      #   run: npm run lint
-
-      # - name: Run tests
-      #   run: npm test
-
-      # - name: Build
-      #   run: npm run build
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - run: cargo test --locked --all-features
+      - run: cargo build --locked --release
+      - name: Analyze safe fixture
+        run: ./target/release/d1-preflight check --schema fixtures/safe/schema.sql --migration fixtures/safe/migration.sql --github

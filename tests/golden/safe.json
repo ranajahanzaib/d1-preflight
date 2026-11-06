@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "tool_version": "0.1.0",
+  "status": "completed",
+  "baseline_source": "schema_sql",
+  "migrations": [
+    {
+      "file": "fixtures/safe/migration.sql",
+      "order": 0,
+      "status": "completed",
+      "error": null
+    }
+  ],
+  "schema_changes": [
+    "Added column users.last_login",
+    "Changed table definition users"
+  ],
+  "findings": [],
+  "summary": {
+    "critical": 0,
+    "high": 0,
+    "low": 0,
+    "medium": 0
+  },
+  "queries": [],
+  "checks": {
+    "d1_foreign_key_policy": "pass: enforcement enabled; deferral allowed",
+    "d1_runtime": "unverified: local SQLite approximation only",
+    "foreign_keys": "pass",
+    "integrity": "pass",
+    "migration_execution": "pass"
+  },
+  "limitations": [
+    "Baseline has no application rows; data-dependent safety checks have limited confidence.",
+    "Local SQLite behavior is verified; D1 runtime compatibility is unverified. Passing is not deployment approval.",
+    "No workload supplied; query compatibility and plan coverage absent.",
+    "Only supplied rows are tested. Application dependencies, CHECK/collation expressions and ambiguous renames require review.",
+    "Query plans are observations, not latency measurements. Workload SQL is never executed; parameters are NULL for planning.",
+    "users: CHECK, collation, generated-expression and deferrability semantics require manual review of changed table SQL."
+  ]
+}

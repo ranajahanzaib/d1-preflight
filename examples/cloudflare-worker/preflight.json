@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "tool_version": "0.1.0",
+  "sqlite_version": "3.54.1",
+  "status": "completed",
+  "baseline_source": "schema_sql",
+  "migrations": [
+    {
+      "file": "examples/cloudflare-worker/migrations/0002_add_note.sql",
+      "order": 0,
+      "status": "completed",
+      "error": null
+    },
+    {
+      "file": "examples/cloudflare-worker/migrations/0003_drop_index.sql",
+      "order": 1,
+      "status": "completed",
+      "error": null
+    }
+  ],
+  "schema_changes": [
+    "Added column orders.note",
+    "Changed table definition orders",
+    "Removed or changed index idx_orders_customer"
+  ],
+  "findings": [
+    {
+      "rule_id": "IX002",
+      "severity": "high",
+      "confidence": "high",
+      "title": "Observed query plan regression",
+      "description": "Local EXPLAIN QUERY PLAN shows a less selective lookup, new temporary sorting, or new automatic indexing. This indicates potential additional work, not a measured production slowdown.",
+      "object": "examples/cloudflare-worker/queries/orders.sql#1",
+      "location": null,
+      "evidence": {
+        "after": ["SCAN orders", "USE TEMP B-TREE FOR ORDER BY"],
+        "before": [
+          "SEARCH orders USING COVERING INDEX idx_orders_customer (customer_id=?)"
+        ],
+        "impact": "potential additional work; no latency measurement"
+      },
+      "recommendation": "Review representative data and restore or replace the supporting index."
+    },
+    {
+      "rule_id": "IX001",
+      "severity": "medium",
+      "confidence": "high",
+      "title": "Index removed or changed",
+      "description": "An existing index disappeared or changed. Workloads may lose an access path; latency impact has not been measured.",
+      "object": "idx_orders_customer",
+      "location": "examples/cloudflare-worker/migrations/0003_drop_index.sql",
+      "evidence": {
+        "after": null,
+        "before": {
+          "origin": "c",
+          "partial": false,
+          "sql": "CREATE INDEX idx_orders_customer ON orders(customer_id, created_at DESC)",
+          "terms": [
+            [1, "customer_id", 0, "BINARY", 1],
+            [2, "created_at", 1, "BINARY", 1],
+            [-1, null, 0, "BINARY", 0]
+          ],
+          "unique": false
+        }
+      },
+      "recommendation": "Compare representative workload plans and retain an equivalent index where needed."
+    }
+  ],
+  "summary": {
+    "critical": 0,
+    "high": 1,
+    "low": 0,
+    "medium": 1
+  },
+  "queries": [
+    {
+      "file": "examples/cloudflare-worker/queries/customer.sql#1",
+      "before": ["SEARCH customers USING INTEGER PRIMARY KEY (rowid=?)"],
+      "after": ["SEARCH customers USING INTEGER PRIMARY KEY (rowid=?)"],
+      "before_steps": [
+        {
+          "id": 2,
+          "parent": 0,
+          "detail": "SEARCH customers USING INTEGER PRIMARY KEY (rowid=?)"
+        }
+      ],
+      "after_steps": [
+        {
+          "id": 2,
+          "parent": 0,
+          "detail": "SEARCH customers USING INTEGER PRIMARY KEY (rowid=?)"
+        }
+      ],
+      "baseline_error": false,
+      "candidate_error": false
+    },
+    {
+      "file": "examples/cloudflare-worker/queries/orders.sql#1",
+      "before": [
+        "SEARCH orders USING COVERING INDEX idx_orders_customer (customer_id=?)"
+      ],
+      "after": ["SCAN orders", "USE TEMP B-TREE FOR ORDER BY"],
+      "before_steps": [
+        {
+          "id": 4,
+          "parent": 0,
+          "detail": "SEARCH orders USING COVERING INDEX idx_orders_customer (customer_id=?)"
+        }
+      ],
+      "after_steps": [
+        {
+          "id": 4,
+          "parent": 0,
+          "detail": "SCAN orders"
+        },
+        {
+          "id": 19,
+          "parent": 0,
+          "detail": "USE TEMP B-TREE FOR ORDER BY"
+        }
+      ],
+      "baseline_error": false,
+      "candidate_error": false
+    }
+  ],
+  "checks": {
+    "d1_foreign_key_policy": "pass: enforcement enabled; deferral allowed",
+    "d1_runtime": "unverified: local SQLite approximation only",
+    "foreign_keys": "pass",
+    "integrity": "pass",
+    "migration_execution": "pass"
+  },
+  "limitations": [
+    "Local SQLite behavior is verified; D1 runtime compatibility is unverified. Passing is not deployment approval.",
+    "Only supplied rows are tested. Application dependencies, CHECK/collation expressions and ambiguous renames require review.",
+    "Query plans are observations, not latency measurements. Workload SQL is never executed; parameters are NULL for planning.",
+    "orders: CHECK, collation, generated-expression and deferrability semantics require manual review of changed table SQL."
+  ]
+}
