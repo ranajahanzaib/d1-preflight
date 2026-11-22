@@ -19,6 +19,18 @@ fn help_and_usage() {
             .code(),
         Some(2)
     );
+    let missing_dir_output = cli(&[
+        "check",
+        "--schema",
+        "fixtures/safe/schema.sql",
+        "--migrations-dir",
+        "nonexistent_dir",
+    ]);
+    assert_eq!(missing_dir_output.status.code(), Some(2));
+    assert!(
+        String::from_utf8_lossy(&missing_dir_output.stderr)
+            .contains("Invalid input: nonexistent_dir does not exist")
+    );
 }
 #[test]
 fn policy_and_reports() {

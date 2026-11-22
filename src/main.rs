@@ -14,26 +14,27 @@ fn main() -> std::process::ExitCode {
             return 2.into();
         }
     };
-    if let Err(e) = d1_preflight::config::validate_outputs(&o) {
-        eprintln!("Invalid output: {e:#}");
-        return 2.into();
-    }
-    if o.verbose {
-        eprintln!("Building isolated baseline and candidate databases; no remote access.");
-    }
-    // Validate source paths and output aliases before opening any database.
+    // Validate source paths before validating output targets.
     let input_paths = o
         .schema
         .iter()
         .chain(o.db.iter())
         .chain(o.data.iter())
         .chain(o.migration.iter())
+        .chain(o.migrations_dir.iter())
         .chain(o.queries.iter());
     for p in input_paths {
         if !p.exists() {
             eprintln!("Invalid input: {} does not exist", p.display());
             return 2.into();
         }
+    }
+    if let Err(e) = d1_preflight::config::validate_outputs(&o) {
+        eprintln!("Invalid output: {e:#}");
+        return 2.into();
+    }
+    if o.verbose {
+        eprintln!("Building isolated baseline and candidate databases; no remote access.");
     }
     let report = match d1_preflight::analyze(&o, &c) {
         Ok(r) => r,
